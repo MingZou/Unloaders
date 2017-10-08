@@ -1,0 +1,205 @@
+
+<div class="row">
+
+    <div  class="col-md-6">
+        <div id="map" class="map-container"></div>
+    </div>
+    <div class="col-md-5 row" ng-show="1==pageNumber">
+        <div class="col-md-4" ng-if="!factoryLocation">
+            <h2>Where do we start?</h2>
+            <p class="text-primary">Choose your factory's location</p>
+
+        </div>
+         <div class="col-md-4" ng-if="factoryLocation">
+             <p class="text-primary">Factory Location:</p>
+            <p class="text-primary">Lat:{{factoryLocation.lat}}</p>
+            <p class="text-primary">Long:{{factoryLocation.lng}}</p>
+            <p class="text-primary"><a class="btn btn-info"  role="button" ng-click="addTruck(true)">+</a></p>
+            <p class="text-primary">I have {{trucks.length}} trucks</p>
+            <p class="text-primary"><a class="btn btn-info"  role="button" ng-click="addTruck(false)">-</a></p>
+            <p class="text-primary" ng-repeat="truck in trucks">truck {{$index}}, capacity:   
+                <input type="number" min="0" class="short-input" ng-model="truck.capacity"/> pkg
+            </p>
+            
+             <p class="text-primary">we work from  {{workTime.start}} to {{workTime.end}}</p>
+             
+             <p >Preference Setting</p>
+             <p class="text-primary">Over Time Penalty $/hr
+             <input type="number" min="0" class="short-input" ng-model="penalty.forTime"/></p>
+             
+             <p class="text-primary">Distance Cost $/100km
+             <input type="number" min="0" class="short-input" ng-model="penalty.forTravelTime"/></p>
+             
+             <p class="text-primary">Overload Penalty $/pkg
+             <input type="number" min="0" class="short-input" ng-model="penalty.forCapacity"/></p>
+            
+
+            <p><a class="btn btn-info"  role="button" ng-click="resetFactory()">reset</a></p>
+        </div>
+
+
+        <div class="col-md-4" ng-if="factoryLocation && 0 == customerLocations.length ">
+            <h2>Where are the customers?</h2>
+            <p class="text-primary">Click on the map. </p>
+
+        </div>
+         <div class="col-md-7" ng-if="0 < customerLocations.length">
+             <p><a class="btn btn-info"  role="button" ng-click="clearCustomer()">clear</a></p>
+
+             <p class="text-primary">Customers:</p>
+             <table >
+                    <tr>
+
+                        <th>
+                           No.  .    
+                        </th>
+                        <th>
+                            Open Time  .
+                        </th>
+
+                        <th>
+                            Close Time  .
+                        </th>
+                        <th>
+                            Load
+                        </th>
+
+
+
+                    </tr>
+                    <tr ng-repeat="customer in customerLocations">
+                        <td>
+                            {{$index + 1}}
+                        </td>
+                        <td>
+                            from: {{customer.start}}
+                        </td>
+                        <td>
+                            to :{{customer.end}}
+                        </td>
+
+                        <td>
+                            {{customer.load}} pkgs
+                        </td>
+
+
+
+
+
+                    </tr>
+
+                </table>
+
+
+        </div>
+        <div class="col-md-1">
+            <p><a class="btn btn-info"  role="button" ng-show="customerLocations.length > 0 && factoryLocation" ng-click="changePage(2)">Try?>></a></p>
+        </div>
+    </div>     
+    
+    <div class="col-md-5 row" ng-show="2==pageNumber">
+        <p ng-show="iteration==0"><a class="btn btn-info"  role="button"  ng-click="changePage(1)" ><< back</a>   
+            <a class="btn btn-info"  role="button"  ng-click="getMatrix(0)" >get matrix</a>
+            <a class="btn btn-info"  role="button"  ng-click="changePage(3)" ng-if="matrix.length>0">go caculate>></a>
+        
+        </p>
+        <p class="text-primary" ng-show="iteration!=0">wait...  google don't allow us to think fast</p>
+        <table >
+            <tr>
+
+                        <th >
+                           <div class="little-cell">No.</div>
+                        </th>
+                        <th >
+                            time
+                        </th>
+                        <th >
+                            cost
+                        </th>
+                        <th >
+                            hr
+                        </th>
+                        
+
+
+
+            </tr>
+                   
+                    <tr ng-repeat="mat in matrix">
+                        <td>
+                            <div class="little-cell">{{$index}}</div>
+                            
+                        </td>
+                        <td  ng-repeat="ele in mat track by $index">
+                            <div class="little-cell">{{ele}}</div>
+                            
+                        </td>
+
+                    </tr>
+
+                </table>
+    </div>
+    
+    <div class="col-md-5 row" ng-show="3==pageNumber">
+         <p ng-show="!calculateWaitingMsg"><a class="btn btn-info"  role="button"  ng-click="changePage(2)" ><< back</a>
+             <a class="btn btn-info"  role="button" ng-click="calculate()" >start caculate</a>
+        </p>
+        <p class="text-primary" ng-show="calculateWaitingMsg">{{calculateWaitingMsg}}</p>
+        
+        
+        <div class="col-md-5" ng-repeat="solution in finalSolution">
+            
+            
+            
+            <p class="text-primary">Truck {{$index}} :</p>
+             <table >
+            <tr>
+
+                        <th>
+                            <div class="little-cell">No.</div>    
+                        </th>
+                        <th >
+                             <div class="long-cell">visit time</div>
+                        </th>
+                        <th >
+                            <div class="little-cell">load</div>
+                        </th>
+                        <th >
+                            <div class="little-cell">open</div>
+                        </th>
+                        
+
+
+
+            </tr>
+                   
+                <tr ng-repeat="point in solution">>
+                        <td>
+                            <div class="little-cell" ng-if="point.locationNumber != 0">{{point.locationNumber}}</div>
+                            <div class="little-cell" ng-if="point.locationNumber == 0">home</div>
+                        </td>
+                        <td >
+                            <div class="long-cell">{{point.unloadTime}}</div>
+                            
+                        </td>
+                        <td >
+                            <div class="little-cell">{{point.load}}pkg</div>
+                            
+                        </td>
+                        <td >
+                            <div class="little-cell" ng-if="point.locationNumber != 0">{{customerLocations[point.locationNumber-1].start}}/{{customerLocations[point.locationNumber-1].end}}</div>
+                            <div class="little-cell" ng-if="point.locationNumber == 0">
+                                {{workTime.start}}/{{workTime.end}}</div>
+                        </td>
+
+                </tr>
+
+            </table>
+            <p class="text-primary">Total distance: {{totalDistance[$index]}} km</p>
+            <p ng-show="!calculateWaitingMsg">
+                <a class="btn btn-info"  role="button"  ng-click="showLines($index)" >show lines</a>
+            </p>
+        </div>
+        
+    </div>
+</div>
