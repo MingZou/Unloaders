@@ -13,6 +13,12 @@ app.config(function ($routeProvider) {
         templateUrl: "/views/map.html"
     });
 
+    $routeProvider.when("/traveller", {
+        controller: "travellerController",
+        templateUrl: "/views/traveller.html"
+    });
+
+
     
 
 
