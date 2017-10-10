@@ -7,14 +7,9 @@
 
         <div class="col-md-4">
             <h2>Choose your starting points</h2>
-            <div ng-repeat="workerHome in workerLocations">
-                <p class="text-primary">Lat:{{workerHome.lat}}</p>
-                <p class="text-primary">Long:{{workerHome.lng}}</p>
-            </div>
-
-
-            <p><a class="btn btn-info" role="button" ng-click="settingWorkers = !settingWorkers">{{settingWorkers? 'next' : 'add more'}}</a></p>
-            <p><a class="btn btn-info" role="button" ng-click="resetFactory()">reset</a></p>
+            
+            <p><a class="btn btn-info" ng-show="workerLocations.length > 0" role="button" ng-click="settingWorkers = !settingWorkers">{{settingWorkers? 'next' : 'add more'}}</a></p>
+            <p><a class="btn btn-info" ng-show="workerLocations.length > 0" role="button" ng-click="resetFactory()">Clear</a></p>
         </div>
 
 
@@ -34,14 +29,14 @@
                         No. .
                     </th>
                     <th>
-                        Open Time .
+                        work load .
                     </th>
 
                     <th>
-                        Close Time .
+                        worker .
                     </th>
                     <th>
-                        Load
+                        day
                     </th>
 
 
@@ -52,20 +47,15 @@
                         {{$index + 1}}
                     </td>
                     <td>
-                        from: {{customer.start}}
+                        {{customer.workLoad}} hrs
                     </td>
                     <td>
-                        to :{{customer.end}}
+                        {{customer.demandedPerson}}
                     </td>
 
                     <td>
-                        {{customer.load}} pkgs
+                        {{customer.demandedDay}}
                     </td>
-
-
-
-
-
                 </tr>
 
             </table>
@@ -73,7 +63,7 @@
 
         </div>
         <div class="col-md-1">
-            <p><a class="btn btn-info" role="button" ng-show="customerLocations.length > 0 && settingWorkers" ng-click="changePage(2)">Try?>></a></p>
+            <p><a class="btn btn-info" role="button" ng-show="customerLocations.length > 0" ng-click="changePage(2)">Try?>></a></p>
         </div>
     </div>
 
@@ -109,7 +99,7 @@
 
             <tr ng-repeat="mat in matrix">
                 <td>
-                    <div class="little-cell">{{$index}}</div>
+                    <div class="little-cell">{{$index + 1}}</div>
 
                 </td>
                 <td ng-repeat="ele in mat track by $index">

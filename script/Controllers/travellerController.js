@@ -9,19 +9,20 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     $scope.workerLocations = [];
     $scope.customerLocations = [];
     
-    var factoryMarkers = [];
+    var workerMarkers = [];
     var customerMarkers = [];
-    var factoryLabels = [];
+    var workerLabels = [];
+    var customerLabels = [];
+    
     var speed = 100; 
     
     $scope.finalSolution = [];
-    $scope.workTime = {start:7, end:18};
+    $scope.planDays = 5;
+    $scope.workTime = {start:7, end:19};
+    $scope.dailyWorkingHours = 8;
 
     $scope.calculateWaitingMsg = null; 
     
-    $scope.trucks = [
-        {capacity: 34},{capacity: 34}
-    ]
     $scope.totalDistance = [];
     $scope.penalty = {forCapacity: 100, forTime: 90, forTravelTime: 40};
     
@@ -170,7 +171,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
                  $scope.matrix.push(timeArr);
                 });
             }
-            if($scope.iteration >= $scope.customerLocations.length)
+            if($scope.iteration >= $scope.customerLocations.length + $scope.workerLocations.length)
             {
                 $scope.$apply(function () { 
                     $scope.iteration =0;
@@ -216,8 +217,10 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         
         var addArr_ = []; 
         
-        var fact_ = new google.maps.LatLng($scope.settingWorkers.lat, $scope.settingWorkers.lng);
-        addArr_.push(fact_);
+        $scope.workerLocations.forEach(function(worker) {
+            var fact_ = new google.maps.LatLng(worker.lat, worker.lng);
+            addArr_.push(fact_);
+        }, this);
         
         for(var i = 0; i< $scope.customerLocations.length; i++)
         {
@@ -293,7 +296,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
             
 
             if($scope.settingWorkers){
-                factoryMarkers.push(marker);
+                workerMarkers.push(marker);
             }
             else{
                 customerMarkers.push(marker);
@@ -316,44 +319,47 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         if($scope.settingWorkers)
         {
             $scope.$apply(function () { 
-                 $scope.workerLocations.push({lat:lat_, 
-                                            lng:long_, 
-                                            start: $scope.workTime.start, 
-                                            end: $scope.workTime.end});
+                 $scope.workerLocations.push({lat:lat_, lng:long_});
              });
            
+             var label = new MarkerWithLabel({
+                position: new google.maps.LatLng(lat_, long_),
+                map: $scope.map,
+                icon: " ",
+                title: "Marker Title",
+                labelText: $scope.workerLocations.length,
+                labelClass: "labels"
+            });
+            workerLabels.push(label);
         }
         else{
-            var startTime_ = Math.floor((Math.random()*($scope.workTime.end - $scope.workTime.start-1))+ $scope.workTime.start);
-            var endT_ = ($scope.workTime.end - startTime_)>4 ? 4 : ($scope.workTime.end - startTime_)
-            var endTime_ = Math.floor((Math.random()*(endT_))+ startTime_+1);
-            
-            var load_ = Math.floor((Math.random()*(5))+1);
+            var load_ = Math.floor((Math.random()*(4))+2);
             $scope.$apply(function () { 
                  $scope.customerLocations.push( {lat:lat_, 
                                         lng:long_,
-                                        start: startTime_,
-                                        end : endTime_,
-                                        load: load_});
+                                        demandedDay: null,
+                                        demandedPerson : null,
+                                        workLoad: load_});
                                     
-                // customerMarkers[customerMarkers.length -1].set("labelContent",startTime_);
              });
              var label = new MarkerWithLabel({
                 position: new google.maps.LatLng(lat_, long_),
                 map: $scope.map,
                 icon: " ",
                 title: "Marker Title",
-                labelText: $scope.customerLocations.length + ":" + startTime_ + "/" + endTime_,
+                labelText: $scope.customerLocations[$scope.customerLocations.length-1].workLoad + "hrs",
                 labelClass: "labels"
             });
-            factoryLabels.push(label);
+            customerLabels.push(label);
         }
     };
     
     $scope.resetFactory  = function (){
-        $scope.settingWorkers = null; 
-         factoryMarkers[0].setMap(null);
-        factoryMarkers = [];
+        $scope.workerLocations.pop();
+        workerLabels[workerLabels.length-1].setMap(null);
+        workerLabels.pop();
+        workerMarkers[workerMarkers.length-1].setMap(null);
+        workerMarkers.pop();
         if($scope.pathDraw != null)
         {
             $scope.pathDraw.setMap(null); 
@@ -363,9 +369,9 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     
     $scope.clearCustomer = function (){
         customerMarkers[customerMarkers.length-1].setMap(null);
-        factoryLabels[customerMarkers.length-1].setMap(null);
-        factoryLabels.pop();
         customerMarkers.pop();
+        customerLabels[customerLabels.length-1].setMap(null);
+        customerLabels.pop();
         $scope.customerLocations.pop();
         
         if($scope.pathDraw != null)
