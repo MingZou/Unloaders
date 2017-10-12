@@ -7,7 +7,7 @@
 
         <div class="col-md-4">
             <h2>Choose your starting points</h2>
-            
+
             <p><a class="btn btn-info" ng-show="workerLocations.length > 0" role="button" ng-click="settingWorkers = !settingWorkers">{{settingWorkers? 'next' : 'add more'}}</a></p>
             <p><a class="btn btn-info" ng-show="workerLocations.length > 0" role="button" ng-click="resetFactory()">Clear</a></p>
         </div>
@@ -33,10 +33,10 @@
                     </th>
 
                     <th>
-                        worker .
+                        appointed worker .
                     </th>
                     <th>
-                        day
+                        appointed day
                     </th>
 
 
@@ -49,12 +49,12 @@
                     <td>
                         {{customer.workLoad}} hrs
                     </td>
-                    <td>
-                        {{customer.demandedPerson}}
+                    <td style="max-width: 80px">
+                        <input type="number" min="0" class="short-input" ng-model="customer.demandedPerson" />
                     </td>
 
-                    <td>
-                        {{customer.demandedDay}}
+                    <td style="max-width: 80px">
+                        <input type="number" min="0" class="short-input" ng-model="customer.demandedDay" />
                     </td>
                 </tr>
 
@@ -119,6 +119,44 @@
                     <a class="btn btn-info" role="button" ng-click="calculate()">start caculate</a>
         </p>
         <p class="text-primary" ng-show="calculateWaitingMsg">{{calculateWaitingMsg}}</p>
+
+        <div class="col-md-3">
+            plan for days:
+            <input type="number" min="0" class="short-input" ng-model="parameters.planDays" />
+        </div>
+        <div class="col-md-3 row">
+            day shift period:
+            <div class="col-md-6">
+                fr.
+                <input type="number" min="0" class="short-input" ng-model="parameters.workTime.start" />
+            </div>
+            <div class="col-md-6">
+                to:
+                <input type="number" min="0" class="short-input" ng-model="parameters.workTime.end" />
+            </div>
+
+        </div>
+        <div class="col-md-3">
+            workload:
+            <input type="number" min="0" class="short-input" ng-model="parameters.dailyWorkingHours" /> hrs
+        </div>
+        <div class="col-md-3">
+            basic salary
+            <input type="number" min="0" class="short-input" ng-model="parameters.salary" />/hr
+        </div>
+        <div class="col-md-3">
+            overtime salary:
+            <input type="number" min="0" class="short-input" ng-model="parameters.overtimeSalary" />/hr
+        </div>
+        <div class="col-md-3">
+            overload salary:
+            <input type="number" min="0" class="short-input" ng-model="parameters.overloadSalary" /> /hr
+        </div>
+        <div class="col-md-3">
+            traffic cost:
+            <input type="number" min="0" class="short-input" ng-model="parameters.trafficCost" /> /hr
+        </div>
+
 
 
         <div class="col-md-5" ng-repeat="solution in finalSolution">

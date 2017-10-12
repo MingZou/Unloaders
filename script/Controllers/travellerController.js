@@ -17,9 +17,16 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     var speed = 100; 
     
     $scope.finalSolution = [];
-    $scope.planDays = 5;
-    $scope.workTime = {start:7, end:19};
-    $scope.dailyWorkingHours = 8;
+
+    $scope.parameters = {
+    planDays : 5,
+    workTime : {start:7, end:19}, 
+    dailyWorkingHours : 8,
+    salary: 200,
+    overtimeSalary: 300,
+    overloadSalary: 400,
+    trafficCost: 100
+    };
 
     $scope.calculateWaitingMsg = null; 
     
@@ -33,22 +40,6 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     $scope.iteration = 0;
     
     $scope.pathDraw = null; 
-    
-    $scope.addTruck = function (add){
-
-        if(true == add){
-            if($scope.trucks.length <= 3)
-            {
-                $scope.trucks.push({capacity: 34});
-            }
-        }
-        else{
-            if($scope.trucks.length>=2)
-            {
-                $scope.trucks.pop();
-            }
-        }
-    }
     
     $scope.showLines = function (truckNum){
         if(null != $scope.pathDraw)
@@ -83,56 +74,19 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     
     
     $scope.calculate = function (){
-        var openWindows = [];
-        openWindows.push({
-                start: $scope.workTime.start,
-                end: $scope.workTime.end,
-                load: 0
-            });
-        for(var i = 0 ; i< $scope.customerLocations.length ; i++)
-        {
-            openWindows.push({
-                start: $scope.customerLocations[i].start,
-                end: $scope.customerLocations[i].end,
-                load: $scope.customerLocations[i].load
-            });
-        }
         var jsObj = {
-            trucks : $scope.trucks,
-            penalty : $scope.penalty,
-            timeMatrix:  $scope.matrix,
-            openWindows: openWindows
+            Parameters : $scope.parameters,
+            TimeMatrix:  $scope.matrix,
+            WorkerNumber: $scope.workerLocations.length,
+            Customers : $scope.customerLocations
         };
         
         
         
         $scope.calculateWaitingMsg = "wait..  it's coming";
-        connectionService.startEvolution(jsObj).then(
+        connectionService.startEvolutionForTraveller(jsObj).then(
             function (solution) {
-                $scope.calculateWaitingMsg = null;
-                $scope.finalSolution = [];
-                $scope.totalDistance = [];
-                var floatMark = 0; 
-                for(var i = 0; i < $scope.trucks.length; i++)
-                {
-                    var oneSolution = [];
-                    var dist_= 0; 
-                    for(var j = floatMark + 1; j < solution.unloadInfos.length; j ++)
-                    {   
-                        oneSolution.push(solution.unloadInfos[j]);
-                        dist_ += $scope.matrix[oneSolution[oneSolution.length -1].locationNumber][oneSolution.length == 1 ? 0: oneSolution[oneSolution.length -2].locationNumber] * speed
-                        if(0 == solution.unloadInfos[j].locationNumber)
-                        {
-                            floatMark = j; 
-                            
-                            break; 
-                        }
-                        
-                    }
-                    $scope.totalDistance.push(dist_);
-                            dist_ = 0;
-                     $scope.finalSolution.push(oneSolution);
-                }
+                console.log(solution);
             }, function (err){
                 $scope.calculateWaitingMsg = null;
                 alert(err); 
@@ -154,7 +108,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
                     {
                         if(j == 0)
                         {
-                            alert("your factory may lacated on the water, I can't caculate :(");
+                            alert("your factory may located on the water, I can't caculate :(");
                         }
                         else{
                             alert("one customer is unreachable(inside the water), customer: " + j);
@@ -171,7 +125,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
                  $scope.matrix.push(timeArr);
                 });
             }
-            if($scope.iteration >= $scope.customerLocations.length + $scope.workerLocations.length)
+            if($scope.iteration >= $scope.customerLocations.length + $scope.workerLocations.length -1)
             {
                 $scope.$apply(function () { 
                     $scope.iteration =0;
@@ -184,13 +138,8 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
             });
             
             
-            if(0 == $scope.iteration)
-            {
-                $scope.getMatrix($scope.iteration);
-            }
-            else{
-                $timeout(function(){ $scope.getMatrix($scope.iteration); }, 3000);
-            }
+            $timeout(function(){ $scope.getMatrix($scope.iteration); }, 3000);
+
            
         }
         else{
