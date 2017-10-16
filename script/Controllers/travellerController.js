@@ -15,6 +15,8 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     var customerLabels = [];
     
     var speed = 100; 
+
+    var addressArray = []; 
     
     $scope.finalSolution = [];
 
@@ -41,25 +43,21 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     
     $scope.pathDraw = null; 
     
-    $scope.showLines = function (truckNum){
+    $scope.showLines = function (solution){
         if(null != $scope.pathDraw)
         {
             $scope.pathDraw.setMap(null); 
             $scope.pathDraw = null; 
         }
+
         var coordinates = [];
-        coordinates.push( new google.maps.LatLng($scope.settingWorkers.lat, $scope.settingWorkers.lng));
-        for(var i = 0; i< $scope.finalSolution[truckNum].length; i++)
-        {
-            if(0 == $scope.finalSolution[truckNum][i].locationNumber)
-            {
-                coordinates.push( new google.maps.LatLng($scope.settingWorkers.lat, $scope.settingWorkers.lng));
+        solution.forEach(function(sl) {
+            if(!sl.worker){
+                coordinates.push( addressArray[sl.CustomerNumber]);
+            }else{
+                coordinates.push( addressArray[sl.number]);
             }
-            else
-            {
-                coordinates.push( new google.maps.LatLng($scope.customerLocations[$scope.finalSolution[truckNum][i].locationNumber-1].lat, $scope.customerLocations[$scope.finalSolution[truckNum][i].locationNumber-1].lng));
-            }
-        }
+        }, this);
         
         $scope.pathDraw  = new google.maps.Polyline({
             path: coordinates,
@@ -86,7 +84,12 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         $scope.calculateWaitingMsg = "wait..  it's coming";
         connectionService.startEvolutionForTraveller(jsObj).then(
             function (solution) {
-                console.log(solution);
+                $scope.calculateWaitingMsg = null;
+                $scope.finalSolution = solution
+                $scope.finalSolution.forEach(function(slt, i) {
+                    slt.unshift({worker: true, number: i});
+                    slt.push({worker: true, number: i});
+                }, this);
             }, function (err){
                 $scope.calculateWaitingMsg = null;
                 alert(err); 
@@ -155,6 +158,19 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     $scope.stopMatrix = function (){
         $scope.iteration = 99;
     }
+
+    var concatWorkerAndCustomerLocations = function(addArray){
+        $scope.workerLocations.forEach(function(worker) {
+            var fact_ = new google.maps.LatLng(worker.lat, worker.lng);
+            addArray.push(fact_);
+        }, this);
+        
+        for(var i = 0; i< $scope.customerLocations.length; i++)
+        {
+            var dest_ = new google.maps.LatLng($scope.customerLocations[i].lat, $scope.customerLocations[i].lng);
+            addArray.push(dest_);
+        }
+    }
     
     $scope.getMatrix = function (iter_){
         var ori_des = {origins: null, destinations : null};
@@ -163,22 +179,11 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
             $scope.matrix= [];
             $scope.iteration = 0;
         }
+        addressArray = [];
+        concatWorkerAndCustomerLocations(addressArray);
         
-        var addArr_ = []; 
-        
-        $scope.workerLocations.forEach(function(worker) {
-            var fact_ = new google.maps.LatLng(worker.lat, worker.lng);
-            addArr_.push(fact_);
-        }, this);
-        
-        for(var i = 0; i< $scope.customerLocations.length; i++)
-        {
-            var dest_ = new google.maps.LatLng($scope.customerLocations[i].lat, $scope.customerLocations[i].lng);
-            addArr_.push(dest_);
-        }
-        
-        ori_des.origins = [addArr_[iter_]];
-        ori_des.destinations = addArr_
+        ori_des.origins = [addressArray[iter_]];
+        ori_des.destinations = addressArray
         
         matrixService.getMatrix(ori_des, callback);
 

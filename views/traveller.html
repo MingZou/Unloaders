@@ -171,14 +171,12 @@
                         <div class="little-cell">No.</div>
                     </th>
                     <th>
-                        <div class="long-cell">visit time</div>
+                        <div class="long-cell">arrive</div>
                     </th>
                     <th>
-                        <div class="little-cell">load</div>
+                        <div class="little-cell">leave</div>
                     </th>
-                    <th>
-                        <div class="little-cell">open</div>
-                    </th>
+
 
 
 
@@ -187,21 +185,16 @@
 
                 <tr ng-repeat="point in solution">>
                     <td>
-                        <div class="little-cell" ng-if="point.locationNumber != 0">{{point.locationNumber}}</div>
-                        <div class="little-cell" ng-if="point.locationNumber == 0">home</div>
+                        <div class="little-cell" ng-if="point.customerNumber != 0">{{point.CustomerNumber}}</div>
+                        <div class="little-cell" ng-if="point.worker">home</div>
                     </td>
                     <td>
-                        <div class="long-cell">{{point.unloadTime}}</div>
+                        <div class="long-cell">{{point.day}}am</div>
 
                     </td>
                     <td>
-                        <div class="little-cell">{{point.load}}pkg</div>
+                        <div class="little-cell">{{point.day}}pm</div>
 
-                    </td>
-                    <td>
-                        <div class="little-cell" ng-if="point.locationNumber != 0">{{customerLocations[point.locationNumber-1].start}}/{{customerLocations[point.locationNumber-1].end}}</div>
-                        <div class="little-cell" ng-if="point.locationNumber == 0">
-                            {{workTime.start}}/{{workTime.end}}</div>
                     </td>
 
                 </tr>
@@ -209,7 +202,7 @@
             </table>
             <p class="text-primary">Total distance: {{totalDistance[$index]}} km</p>
             <p ng-show="!calculateWaitingMsg">
-                <a class="btn btn-info" role="button" ng-click="showLines($index)">show lines</a>
+                <a class="btn btn-info" role="button" ng-click="showLines(solution)">show lines</a>
             </p>
         </div>
 
