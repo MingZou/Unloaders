@@ -154,7 +154,7 @@
         </div>
         <div class="col-md-3">
             traffic cost:
-            <input type="number" min="0" class="short-input" ng-model="parameters.trafficCost" /> /hr
+            <input type="number" min="0" class="short-input" ng-model="parameters.trafficCost" /> /km
         </div>
 
 
@@ -163,7 +163,7 @@
 
 
 
-            <p class="text-primary">Truck {{$index}} :</p>
+            <p class="text-primary">Worker {{$index}} :</p>
             <table>
                 <tr>
 
@@ -185,7 +185,7 @@
 
                 <tr ng-repeat="point in solution">>
                     <td>
-                        <div class="little-cell" ng-if="point.customerNumber != 0">{{point.CustomerNumber}}</div>
+                        <div class="little-cell" ng-if="point.CustomerNumber">{{point.CustomerNumber - workerLocations.length + 1}}</div>
                         <div class="little-cell" ng-if="point.worker">home</div>
                     </td>
                     <td>

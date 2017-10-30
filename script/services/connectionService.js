@@ -1,5 +1,5 @@
 app.service('connectionService', function ($http, $q) {
-    baseUrl = "http://localhost:59080"
+    baseUrl = ""
 
     this.startEvolution = function (object) {
 

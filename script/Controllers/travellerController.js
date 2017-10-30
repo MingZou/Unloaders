@@ -27,7 +27,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     salary: 200,
     overtimeSalary: 300,
     overloadSalary: 400,
-    trafficCost: 100
+    trafficCost: 1
     };
 
     $scope.calculateWaitingMsg = null; 
@@ -36,6 +36,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
     $scope.penalty = {forCapacity: 100, forTime: 90, forTravelTime: 40};
     
     $scope.matrix = [];
+    var distanceMatrix = [];
     
     $scope.pageNumber = 1;
     
@@ -75,6 +76,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         var jsObj = {
             Parameters : $scope.parameters,
             TimeMatrix:  $scope.matrix,
+            DistanceMatrix: distanceMatrix,
             WorkerNumber: $scope.workerLocations.length,
             Customers : $scope.customerLocations
         };
@@ -85,11 +87,12 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         connectionService.startEvolutionForTraveller(jsObj).then(
             function (solution) {
                 $scope.calculateWaitingMsg = null;
-                $scope.finalSolution = solution
+                $scope.finalSolution = solution.Order;
                 $scope.finalSolution.forEach(function(slt, i) {
                     slt.unshift({worker: true, number: i});
                     slt.push({worker: true, number: i});
                 }, this);
+                $scope.totalDistance = solution.TotalDistances;
             }, function (err){
                 $scope.calculateWaitingMsg = null;
                 alert(err); 
@@ -105,6 +108,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
             for(var i = 0 ; i < response.rows.length; i++)
             {
                 var timeArr = [];
+                var distanceArr = [];
                 for(var j = 0; j < response.rows[i].elements.length; j++)
                 {
                     if(null == response.rows[i].elements[j].duration)
@@ -118,14 +122,17 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
                         }
                         $scope.$apply(function () { 
                              $scope.matrix= [];
+                             distanceMatrix = [];
                             $scope.iteration = 0;
                         });
                         return ;
                     }
                     timeArr.push(Math.round(response.rows[i].elements[j].duration.value/36)/100);
+                    distanceArr.push(Math.round(response.rows[i].elements[j].distance.value/1000));
                 }
                 $scope.$apply(function () { 
                  $scope.matrix.push(timeArr);
+                 distanceMatrix.push(distanceArr);
                 });
             }
             if($scope.iteration >= $scope.customerLocations.length + $scope.workerLocations.length -1)
@@ -148,6 +155,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         else{
             $scope.$apply(function () { 
                  $scope.matrix= [];
+                 distanceMatrix= [];
                  $scope.iteration = 0;
              });
             
@@ -177,6 +185,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         if(0 == iter_)
         {    
             $scope.matrix= [];
+            distanceMatrix= [];            
             $scope.iteration = 0;
         }
         addressArray = [];
@@ -268,6 +277,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
         if($scope.matrix.length >0)
         {
             $scope.matrix = [];
+            distanceMatrix= [];
         }
         
         if($scope.settingWorkers)
@@ -301,7 +311,7 @@ app.controller('travellerController', ['$scope', 'matrixService', '$timeout', 'c
                 map: $scope.map,
                 icon: " ",
                 title: "Marker Title",
-                labelText: $scope.customerLocations[$scope.customerLocations.length-1].workLoad + "hrs",
+                labelText: $scope.customerLocations.length + ":" + $scope.customerLocations[$scope.customerLocations.length-1].workLoad + "hrs",
                 labelClass: "labels"
             });
             customerLabels.push(label);
